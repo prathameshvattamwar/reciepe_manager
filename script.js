@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "Salt and pepper to taste"
                     ],
                     instructions: "Heat olive oil in a large pot over medium heat.\nAdd onions and cook until translucent, about 5 minutes.\nAdd garlic and cook for another minute.\nAdd diced tomatoes, vegetable broth, basil, and sugar.\nBring to a boil, then reduce heat and simmer for 15 minutes.\nUse an immersion blender to puree the soup until smooth.\nStir in heavy cream and season with salt and pepper.\nServe hot, garnished with fresh basil leaves.",
-                    imageUrl: "https://via.placeholder.com/400x300?text=Tomato+Basil+Soup",
+                    imageUrl: "tomato_soup.png",
                     isFavorite: false,
                     dateCreated: new Date().toISOString()
                 },
@@ -893,7 +893,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "2 tbsp chopped peanuts (optional)"
                     ],
                     instructions: "Slice the banana into 1/2 inch thick rounds.\nSpread a small amount of peanut butter on top of each banana slice.\nStack another banana slice on top to create a sandwich.\nDip each sandwich halfway into melted chocolate.\nSprinkle with chopped peanuts if desired.\nPlace on a parchment-lined tray and freeze for at least 1 hour.\nStore in an airtight container in the freezer.",
-                    imageUrl: "https://via.placeholder.com/400x300?text=Peanut+Butter+Banana+Bites",
+                    imageUrl: "banana.jpg",
                     isFavorite: true,
                     dateCreated: new Date().toISOString()
                 },
@@ -917,7 +917,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "Fresh parsley for garnish"
                     ],
                     instructions: "Preheat oven to 400°F (200°C).\nIn a large mixing bowl, combine all chopped vegetables and sliced sausage.\nDrizzle with olive oil and add all seasonings.\nToss until everything is evenly coated.\nSpread mixture onto a large baking sheet in a single layer.\nBake for 20-25 minutes, stirring halfway through, until vegetables are tender.\nGarnish with fresh parsley before serving.",
-                    imageUrl: "https://via.placeholder.com/400x300?text=One-Pan+Sausage+and+Veggies",
+                    imageUrl: "one_pan.jpg",
                     isFavorite: false,
                     dateCreated: new Date().toISOString()
                 }

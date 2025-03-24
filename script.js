@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterSelect = document.getElementById('filter-select');
     const favoritesFilterBtn = document.getElementById('favorites-filter');
     const addRecipeBtn = document.getElementById('add-recipe-btn');
+    const emptyAddBtn = document.getElementById('empty-add-btn');
     const recipeModal = document.getElementById('recipe-modal');
     const detailModal = document.getElementById('detail-modal');
     const shoppingListModal = document.getElementById('shopping-list-modal');
@@ -25,11 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const editRecipeBtn = document.getElementById('edit-recipe-btn');
     const deleteRecipeBtn = document.getElementById('delete-recipe-btn');
     const addToShoppingBtn = document.getElementById('add-to-shopping-btn');
-    const viewShoppingListBtn = document.getElementById('view-shopping-list-btn');
+    const shoppingListFab = document.getElementById('shopping-list-fab');
     const shoppingListContainer = document.getElementById('shopping-list-container');
     const printShoppingListBtn = document.getElementById('print-shopping-list');
     const clearShoppingListBtn = document.getElementById('clear-shopping-list');
-    const closeBtns = document.querySelectorAll('.close');
+    const closeBtns = document.querySelectorAll('.close-btn');
     
     // State Management
     let recipes = [];
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('recipes', JSON.stringify(recipes));
         } catch (error) {
             console.error('Error saving recipes to localStorage:', error);
-            alert('Error saving recipes. Local storage may be full or disabled.');
+            showToast('Error saving recipes. Storage may be full.', 'error');
         }
     }
     
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
         } catch (error) {
             console.error('Error saving shopping list to localStorage:', error);
-            alert('Error saving shopping list. Local storage may be full or disabled.');
+            showToast('Error saving shopping list. Storage may be full.', 'error');
         }
     }
     
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Recipe form events
         addRecipeBtn.addEventListener('click', openAddRecipeModal);
+        emptyAddBtn.addEventListener('click', openAddRecipeModal);
         addIngredientBtn.addEventListener('click', addIngredientRow);
         recipeForm.addEventListener('submit', saveRecipe);
         cancelBtn.addEventListener('click', closeModal);
@@ -109,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addToShoppingBtn.addEventListener('click', addRecipeToShoppingList);
         
         // Shopping list events
-        viewShoppingListBtn.addEventListener('click', openShoppingListModal);
+        shoppingListFab.addEventListener('click', openShoppingListModal);
         printShoppingListBtn.addEventListener('click', printShoppingList);
         clearShoppingListBtn.addEventListener('click', clearShoppingList);
         
@@ -128,6 +130,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeDetailModal();
             } else if (e.target === shoppingListModal) {
                 closeShoppingListModal();
+            }
+        });
+
+        // Enable ESC key to close modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllModals();
             }
         });
     }
@@ -167,10 +176,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show or hide the "no recipes" message
         if (filteredRecipes.length === 0 && recipes.length === 0) {
             noRecipesMessage.style.display = 'block';
-            noRecipesMessage.innerHTML = '<p>You don\'t have any recipes yet. Click "Add New Recipe" to create your first recipe!</p>';
         } else if (filteredRecipes.length === 0) {
             noRecipesMessage.style.display = 'block';
-            noRecipesMessage.innerHTML = '<p>No recipes match your search criteria.</p>';
+            noRecipesMessage.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search empty-icon"></i>
+                    <h2>No matching recipes</h2>
+                    <p>Try adjusting your search criteria or filters.</p>
+                </div>
+            `;
         } else {
             noRecipesMessage.style.display = 'none';
         }
@@ -186,20 +200,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const card = document.createElement('div');
         card.className = 'recipe-card';
         
-        const imageUrl = recipe.imageUrl || 'https://via.placeholder.com/300x180?text=No+Image';
+        const imageUrl = recipe.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image';
         
         card.innerHTML = `
-            <img src="${imageUrl}" alt="${recipe.name}" class="recipe-image" onerror="this.src='https://via.placeholder.com/300x180?text=Error+Loading+Image'">
-            <div class="recipe-info">
-                <div class="recipe-title">
-                    <h3>${recipe.name}</h3>
+            <img src="${imageUrl}" alt="${recipe.name}" class="recipe-image" onerror="this.src='https://via.placeholder.com/400x300?text=Error+Loading+Image'">
+            <div class="recipe-content">
+                <div class="recipe-header">
+                    <h3 class="recipe-title">${recipe.name}</h3>
                     <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}">
                         <i class="fas fa-star"></i>
                     </button>
                 </div>
                 <div class="recipe-meta">
-                    <span><i class="fas fa-clock"></i> ${recipe.time} mins</span>
-                    <span><i class="fas fa-utensils"></i> ${recipe.servings} servings</span>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>${recipe.time} mins</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-utensils"></i>
+                        <span>${recipe.servings} servings</span>
+                    </div>
                 </div>
                 <span class="recipe-category">${capitalizeFirstLetter(recipe.category)}</span>
                 <button class="view-recipe-btn">View Recipe</button>
@@ -233,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Open the modal
         recipeModal.style.display = 'block';
+        recipeNameInput.focus();
     }
     
     function openEditRecipeModal(recipe) {
@@ -262,6 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Open the modal
         closeDetailModal();
         recipeModal.style.display = 'block';
+        recipeNameInput.focus();
     }
     
     function addIngredientRow(value = '') {
@@ -269,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.className = 'ingredient-row';
         row.innerHTML = `
             <input type="text" class="ingredient-input" placeholder="e.g., 2 cups flour" value="${value}" required>
-            <button type="button" class="remove-ingredient"><i class="fas fa-times"></i></button>
+            <button type="button" class="remove-ingredient"><i class="fas fa-trash"></i></button>
         `;
         
         row.querySelector('.remove-ingredient').addEventListener('click', () => {
@@ -319,10 +341,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Preserve the favorite status
                 recipe.isFavorite = recipes[index].isFavorite;
                 recipes[index] = recipe;
+                showToast('Recipe updated successfully!', 'success');
             }
         } else {
             // Add new recipe
             recipes.push(recipe);
+            showToast('Recipe added successfully!', 'success');
         }
         
         // Save to local storage and update the UI
@@ -342,42 +366,65 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!recipe) {
             console.error('Recipe not found:', recipeId);
+            showToast('Recipe not found.', 'error');
             return;
         }
         
+        // Format instructions with step numbers
+        const instructionsHtml = recipe.instructions
+            .split('\n')
+            .filter(step => step.trim())
+            .map((step, index) => `
+                <div class="instruction-step">
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-text">${step}</div>
+                </div>
+            `)
+            .join('');
+        
         // Create the recipe detail HTML
         recipeDetailContainer.innerHTML = `
-            <div class="recipe-detail-header">
-                <div class="recipe-detail-title">
-                    <h2>${recipe.name}</h2>
-                    <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}">
-                        <i class="fas fa-star"></i>
-                    </button>
+            <div class="recipe-detail">
+                <div class="recipe-detail-header">
+                    <div class="recipe-detail-title">
+                        <h2>${recipe.name}</h2>
+                        <button class="favorite-btn ${recipe.isFavorite ? 'active' : ''}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    </div>
+                    <span class="recipe-category">${capitalizeFirstLetter(recipe.category)}</span>
                 </div>
-                <span class="recipe-category">${capitalizeFirstLetter(recipe.category)}</span>
-            </div>
-            
-            ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" class="recipe-detail-image" onerror="this.src='https://via.placeholder.com/800x400?text=Error+Loading+Image'">` : ''}
-            
-            <div class="recipe-detail-meta">
-                <div class="meta-item">
-                    <i class="fas fa-clock"></i>
-                    <span>${recipe.time} minutes</span>
+                
+                ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.name}" class="recipe-detail-image" onerror="this.src='https://via.placeholder.com/800x400?text=Error+Loading+Image'">` : ''}
+                
+                <div class="recipe-detail-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Time: ${recipe.time} minutes</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-utensils"></i>
+                        <span>Servings: ${recipe.servings}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Added: ${formatDate(recipe.dateCreated)}</span>
+                    </div>
                 </div>
-                <div class="meta-item">
-                    <i class="fas fa-utensils"></i>
-                    <span>${recipe.servings} servings</span>
+                
+                <div class="ingredients-section">
+                    <h3 class="section-title">Ingredients</h3>
+                    <ul class="ingredient-list">
+                        ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                    </ul>
                 </div>
-            </div>
-            
-            <h3>Ingredients</h3>
-            <ul class="ingredient-list">
-                ${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
-            </ul>
-            
-            <h3>Instructions</h3>
-            <div class="instruction-list">
-                ${formatInstructions(recipe.instructions)}
+                
+                <div class="instructions-section">
+                    <h3 class="section-title">Instructions</h3>
+                    <div class="instruction-list">
+                        ${instructionsHtml}
+                    </div>
+                </div>
             </div>
         `;
         
@@ -404,7 +451,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function handleDeleteRecipe() {
-        if (confirm('Are you sure you want to delete this recipe?')) {
+        const recipe = recipes.find(r => r.id === currentRecipeId);
+        
+        if (confirmAction(`Are you sure you want to delete "${recipe.name}"?`)) {
             // Remove the recipe from the array
             recipes = recipes.filter(r => r.id !== currentRecipeId);
             
@@ -412,6 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveRecipes();
             renderRecipes();
             closeDetailModal();
+            showToast('Recipe deleted successfully!', 'success');
         }
     }
     
@@ -421,6 +471,10 @@ document.addEventListener('DOMContentLoaded', function() {
             recipe.isFavorite = !recipe.isFavorite;
             saveRecipes();
             renderRecipes();
+            
+            if (recipe.isFavorite) {
+                showToast(`"${recipe.name}" added to favorites!`, 'success');
+            }
         }
     }
     
@@ -436,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!recipe) return;
         
         // Add each ingredient to shopping list if not already there
+        let addedCount = 0;
+        
         recipe.ingredients.forEach(ingredient => {
             const existingIndex = shoppingList.findIndex(item => 
                 item.text.toLowerCase() === ingredient.toLowerCase()
@@ -449,11 +505,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     recipeId: recipe.id,
                     recipeName: recipe.name
                 });
+                addedCount++;
             }
         });
         
         saveShoppingList();
-        alert(`Ingredients from "${recipe.name}" added to shopping list!`);
+        closeDetailModal();
+        
+        if (addedCount > 0) {
+            showToast(`${addedCount} ingredients from "${recipe.name}" added to shopping list!`, 'success');
+        } else {
+            showToast('All ingredients are already in your shopping list.', 'info');
+        }
     }
     
     function openShoppingListModal() {
@@ -469,7 +532,13 @@ document.addEventListener('DOMContentLoaded', function() {
         shoppingListContainer.innerHTML = '';
         
         if (shoppingList.length === 0) {
-            shoppingListContainer.innerHTML = '<p>Your shopping list is empty.</p>';
+            shoppingListContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-shopping-basket empty-icon"></i>
+                    <h2>Your shopping list is empty</h2>
+                    <p>Add ingredients from recipes to your shopping list.</p>
+                </div>
+            `;
             return;
         }
         
@@ -493,7 +562,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const groupElement = document.createElement('div');
             groupElement.className = 'shopping-group';
-            groupElement.innerHTML = `<h3>${group.name}</h3>`;
+            
+            groupElement.innerHTML = `
+                <h3 class="group-title">
+                    <i class="fas fa-clipboard-list"></i>
+                    ${group.name}
+                </h3>
+            `;
             
             group.items.forEach(item => {
                 const itemElement = document.createElement('div');
@@ -501,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 itemElement.innerHTML = `
                     <input type="checkbox" class="shopping-checkbox" id="item-${item.id}" ${item.isChecked ? 'checked' : ''}>
                     <label for="item-${item.id}" class="shopping-text ${item.isChecked ? 'checked' : ''}">${item.text}</label>
-                    <button class="remove-item"><i class="fas fa-times"></i></button>
+                    <button class="icon-btn remove-item"><i class="fas fa-times"></i></button>
                 `;
                 
                 // Checkbox change event
@@ -526,7 +601,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (item) {
             item.isChecked = isChecked;
             saveShoppingList();
-            renderShoppingList();
+            
+            // Only update the specific item, not the entire list
+            const checkbox = document.getElementById(`item-${itemId}`);
+            const label = checkbox.nextElementSibling;
+            if (isChecked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
         }
     }
     
@@ -534,13 +617,15 @@ document.addEventListener('DOMContentLoaded', function() {
         shoppingList = shoppingList.filter(i => i.id !== itemId);
         saveShoppingList();
         renderShoppingList();
+        showToast('Item removed from shopping list.', 'info');
     }
     
     function clearShoppingList() {
-        if (confirm('Are you sure you want to clear the entire shopping list?')) {
+        if (confirmAction('Are you sure you want to clear the entire shopping list?')) {
             shoppingList = [];
             saveShoppingList();
             renderShoppingList();
+            showToast('Shopping list cleared.', 'info');
         }
     }
     
@@ -554,21 +639,81 @@ document.addEventListener('DOMContentLoaded', function() {
             <head>
                 <title>Shopping List</title>
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-                    h1 { text-align: center; margin-bottom: 20px; }
-                    .group { margin-bottom: 20px; }
-                    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-                    ul { list-style-type: square; }
-                    li { margin-bottom: 10px; }
-                    .checked { text-decoration: line-through; color: #999; }
+                    body { 
+                        font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
+                        line-height: 1.6; 
+                        padding: 20px;
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    h1 { 
+                        text-align: center; 
+                        margin-bottom: 20px;
+                        color: #4caf50;
+                    }
+                    .print-date {
+                        text-align: center;
+                        font-size: 0.9rem;
+                        color: #757575;
+                        margin-bottom: 30px;
+                    }
+                    .group { 
+                        margin-bottom: 20px; 
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        overflow: hidden;
+                    }
+                    h2 { 
+                        background-color: #f5f5f5;
+                        padding: 10px 15px;
+                        margin: 0;
+                        font-size: 1.2rem;
+                        border-bottom: 1px solid #e0e0e0;
+                    }
+                    ul { 
+                        list-style-type: square;
+                        padding: 15px 40px;
+                        margin: 0;
+                    }
+                    li { 
+                        margin-bottom: 8px;
+                        padding: 5px 0;
+                    }
+                    .checked { 
+                        text-decoration: line-through; 
+                        color: #9e9e9e; 
+                    }
+                    .print-button {
+                        display: block;
+                        width: 150px;
+                        margin: 20px auto;
+                        padding: 10px;
+                        background-color: #4caf50;
+                        color: white;
+                        text-align: center;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        border: none;
+                        font-weight: bold;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 30px;
+                        font-size: 0.9rem;
+                        color: #757575;
+                        border-top: 1px solid #e0e0e0;
+                        padding-top: 20px;
+                    }
                     @media print {
-                        button { display: none; }
+                        .print-button { display: none; }
+                        body { padding: 0; }
                     }
                 </style>
             </head>
             <body>
                 <h1>Shopping List</h1>
-                <button onclick="window.print()">Print</button>
+                <div class="print-date">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
+                <button class="print-button" onclick="window.print()">Print List</button>
         `;
         
         // Group items by recipe
@@ -606,6 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         content += `
+                <div class="footer">Recipe Manager - Your Personal Recipe Collection</div>
             </body>
             </html>
         `;
@@ -626,19 +772,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
     
-    function formatInstructions(instructions) {
-        if (!instructions) return '';
-        
-        // Split by newlines and wrap in paragraphs
-        return instructions
-            .split('\n')
-            .filter(line => line.trim())
-            .map(line => `<p>${line}</p>`)
-            .join('');
+    function capitalizeFirstLetter(string) {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
     
-    function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        }).format(date);
     }
     
     function debounce(func, wait) {
@@ -653,6 +799,160 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
     
+    function confirmAction(message) {
+        return window.confirm(message);
+    }
+    
+    function showToast(message, type = 'info') {
+        // Remove any existing toasts
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        // Add icon based on type
+        let icon = 'info-circle';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        
+        toast.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to DOM
+        document.body.appendChild(toast);
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+    
+    // Sample Recipes (for first-time users)
+    function addSampleRecipes() {
+        if (recipes.length === 0) {
+            const sampleRecipes = [
+                {
+                    id: generateId(),
+                    name: "Veggie Breakfast Scramble",
+                    category: "breakfast",
+                    time: 15,
+                    servings: 2,
+                    ingredients: [
+                        "4 large eggs",
+                        "1/2 red bell pepper, diced",
+                        "1/2 green bell pepper, diced",
+                        "1/4 cup diced onion",
+                        "1 cup fresh spinach",
+                        "1 tbsp olive oil",
+                        "Salt and pepper to taste",
+                        "1/4 cup shredded cheddar cheese"
+                    ],
+                    instructions: "Heat olive oil in a non-stick skillet over medium heat.\nAdd diced onions and bell peppers, sauté for 3-4 minutes until softened.\nAdd spinach and cook until wilted, about 1 minute.\nWhisk eggs in a bowl, season with salt and pepper.\nPour eggs over vegetables and gently stir as they cook.\nWhen eggs are almost set, sprinkle cheese on top and cover until melted.\nServe hot with toast or avocado slices.",
+                    imageUrl: "https://via.placeholder.com/400x300?text=Veggie+Breakfast+Scramble",
+                    isFavorite: false,
+                    dateCreated: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    name: "Tomato Basil Soup",
+                    category: "lunch",
+                    time: 25,
+                    servings: 2,
+                    ingredients: [
+                        "2 tbsp olive oil",
+                        "1 large onion, chopped",
+                        "2 cloves garlic, minced",
+                        "2 cans (14 oz each) diced tomatoes",
+                        "2 cups vegetable broth",
+                        "1/4 cup fresh basil leaves, plus more for garnish",
+                        "1 tsp sugar",
+                        "1/2 cup heavy cream",
+                        "Salt and pepper to taste"
+                    ],
+                    instructions: "Heat olive oil in a large pot over medium heat.\nAdd onions and cook until translucent, about 5 minutes.\nAdd garlic and cook for another minute.\nAdd diced tomatoes, vegetable broth, basil, and sugar.\nBring to a boil, then reduce heat and simmer for 15 minutes.\nUse an immersion blender to puree the soup until smooth.\nStir in heavy cream and season with salt and pepper.\nServe hot, garnished with fresh basil leaves.",
+                    imageUrl: "https://via.placeholder.com/400x300?text=Tomato+Basil+Soup",
+                    isFavorite: false,
+                    dateCreated: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    name: "Peanut Butter Banana Bites",
+                    category: "snack",
+                    time: 10,
+                    servings: 1,
+                    ingredients: [
+                        "1 ripe banana",
+                        "2 tbsp peanut butter",
+                        "1/4 cup chocolate chips, melted",
+                        "2 tbsp chopped peanuts (optional)"
+                    ],
+                    instructions: "Slice the banana into 1/2 inch thick rounds.\nSpread a small amount of peanut butter on top of each banana slice.\nStack another banana slice on top to create a sandwich.\nDip each sandwich halfway into melted chocolate.\nSprinkle with chopped peanuts if desired.\nPlace on a parchment-lined tray and freeze for at least 1 hour.\nStore in an airtight container in the freezer.",
+                    imageUrl: "https://via.placeholder.com/400x300?text=Peanut+Butter+Banana+Bites",
+                    isFavorite: true,
+                    dateCreated: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    name: "One-Pan Sausage and Veggies",
+                    category: "dinner",
+                    time: 30,
+                    servings: 3,
+                    ingredients: [
+                        "1 lb smoked sausage, sliced",
+                        "2 cups baby red potatoes, quartered",
+                        "1 red bell pepper, chopped",
+                        "1 zucchini, chopped",
+                        "1 yellow squash, chopped",
+                        "1/2 red onion, chopped",
+                        "2 tbsp olive oil",
+                        "2 tsp Italian seasoning",
+                        "1 tsp garlic powder",
+                        "Salt and pepper to taste",
+                        "Fresh parsley for garnish"
+                    ],
+                    instructions: "Preheat oven to 400°F (200°C).\nIn a large mixing bowl, combine all chopped vegetables and sliced sausage.\nDrizzle with olive oil and add all seasonings.\nToss until everything is evenly coated.\nSpread mixture onto a large baking sheet in a single layer.\nBake for 20-25 minutes, stirring halfway through, until vegetables are tender.\nGarnish with fresh parsley before serving.",
+                    imageUrl: "https://via.placeholder.com/400x300?text=One-Pan+Sausage+and+Veggies",
+                    isFavorite: false,
+                    dateCreated: new Date().toISOString()
+                }
+            ];
+            
+            recipes = sampleRecipes;
+            saveRecipes();
+            renderRecipes();
+            showToast('Sample recipes have been added to help you get started!', 'success');
+        }
+    }
+    
+    // Check for Dark Mode Preference
+    function checkDarkMode() {
+        const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDarkMode) {
+            document.body.classList.add('dark-mode-enabled');
+        }
+        
+        // Listen for changes in color scheme preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (e.matches) {
+                document.body.classList.add('dark-mode-enabled');
+            } else {
+                document.body.classList.remove('dark-mode-enabled');
+            }
+        });
+    }
+    
     // Initialize the application
     init();
+    
+    // Add sample recipes if this is a first time user
+    addSampleRecipes();
+    
+    // Check for dark mode preference
+    checkDarkMode();
 });

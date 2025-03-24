@@ -854,7 +854,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "1/4 cup shredded cheddar cheese"
                     ],
                     instructions: "Heat olive oil in a non-stick skillet over medium heat.\nAdd diced onions and bell peppers, sauté for 3-4 minutes until softened.\nAdd spinach and cook until wilted, about 1 minute.\nWhisk eggs in a bowl, season with salt and pepper.\nPour eggs over vegetables and gently stir as they cook.\nWhen eggs are almost set, sprinkle cheese on top and cover until melted.\nServe hot with toast or avocado slices.",
-                    imageUrl: "https://via.placeholder.com/400x300?text=Veggie+Breakfast+Scramble",
+                    imageUrl: "viggie.jpg",
                     isFavorite: false,
                     dateCreated: new Date().toISOString()
                 },

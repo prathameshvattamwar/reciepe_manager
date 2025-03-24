@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Poppins font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Recipe Manager</h1>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search recipes by name or ingredient...">
+                <select id="filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="dessert">Dessert</option>
+                    <option value="snack">Snack</option>
+                </select>
+                <button id="favorites-filter"><i class="fas fa-star"></i> Favorites</button>
+            </div>
+            <button id="add-recipe-btn" class="primary-btn"><i class="fas fa-plus"></i> Add New Recipe</button>
+        </header>
+
+        <main>
+            <div id="recipe-list" class="recipe-list-container">
+                <!-- Recipes will be dynamically added here -->
+                <div id="no-recipes-message">
+                    <p>You don't have any recipes yet. Click "Add New Recipe" to create your first recipe!</p>
+                </div>
+            </div>
+
+            <!-- Recipe Form Modal -->
+            <div id="recipe-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2 id="modal-title">Add New Recipe</h2>
+                    <form id="recipe-form">
+                        <input type="hidden" id="recipe-id">
+                        <div class="form-group">
+                            <label for="recipe-name">Recipe Name</label>
+                            <input type="text" id="recipe-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-category">Category</label>
+                            <select id="recipe-category" required>
+                                <option value="">Select a category</option>
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="dessert">Dessert</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-time">Cooking Time (minutes)</label>
+                            <input type="number" id="recipe-time" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-servings">Servings</label>
+                            <input type="number" id="recipe-servings" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ingredients</label>
+                            <div id="ingredients-container">
+                                <div class="ingredient-row">
+                                    <input type="text" class="ingredient-input" placeholder="e.g., 2 cups flour" required>
+                                    <button type="button" class="remove-ingredient"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-ingredient" class="secondary-btn">Add Ingredient</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-instructions">Instructions</label>
+                            <textarea id="recipe-instructions" rows="6" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-image">Image URL (optional)</label>
+                            <input type="url" id="recipe-image" placeholder="http://example.com/image.jpg">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="primary-btn">Save Recipe</button>
+                            <button type="button" id="cancel-btn" class="secondary-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recipe Detail Modal -->
+            <div id="detail-modal" class="modal">
+                <div class="modal-content detail-content">
+                    <span class="close">&times;</span>
+                    <div id="recipe-detail-container">
+                        <!-- Recipe details will be displayed here -->
+                    </div>
+                    <div class="detail-actions">
+                        <button id="edit-recipe-btn" class="secondary-btn"><i class="fas fa-edit"></i> Edit</button>
+                        <button id="delete-recipe-btn" class="danger-btn"><i class="fas fa-trash"></i> Delete</button>
+                        <button id="add-to-shopping-btn" class="primary-btn"><i class="fas fa-shopping-cart"></i> Add to Shopping List</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shopping List Modal -->
+            <div id="shopping-list-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Shopping List</h2>
+                    <div id="shopping-list-container">
+                        <!-- Shopping list will be displayed here -->
+                    </div>
+                    <div class="shopping-actions">
+                        <button id="print-shopping-list" class="secondary-btn"><i class="fas fa-print"></i> Print</button>
+                        <button id="clear-shopping-list" class="danger-btn"><i class="fas fa-trash"></i> Clear List</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <button id="view-shopping-list-btn"><i class="fas fa-shopping-cart"></i> View Shopping List</button>
+            <p>&copy; 2025 Recipe Manager | Your Personal Recipe Collection</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
